@@ -1,0 +1,373 @@
+swagger: '2.0'
+info:
+  title: Bank Argent API documentation
+  description: Contains all available API endpoints in this codebase
+  version: '1.0.0'
+  termsOfService: 'http://swagger.io/terms/'
+host: localhost:3001
+basePath: /api/v1
+schemes:
+  - http
+paths:
+  /user/login:
+    post:
+      tags:
+        - User Module
+      summary: Login
+      description: API for Login
+      parameters:
+        - in: body
+          name: body
+          description: Login Payload
+          required: true
+          schema:
+            $ref: '#/definitions/Login'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Login Successfully
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+  /user/signup:
+    post:
+      tags:
+        - User Module
+      summary: Signup
+      description: API for Signup
+      parameters:
+        - in: body
+          name: body
+          description: Signup Payload
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Signup Successfully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+  /user/profile:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: User Profile API
+      description: API for fetching a user profile
+      #produces:
+       # - application/json
+      responses:
+        '200':
+          description: User profile retrieved successully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: User Profile API
+      description: API for updating a user profile
+      parameters:
+        - in: body
+          name: body
+          description: Update user profile attributes
+          required: true
+          schema:
+            $ref: '#/definitions/UserProfile'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User profile retrieved successully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Invalid Fields
+        '500':
+          description: Internal Server Error
+  /accounts:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Liste des comptes utilisateur
+      description: |
+        Retourne la liste de tous les comptes bancaires associés à l'utilisateur authentifié.
+        (Exemple : compte courant, livret A, etc.)
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Liste des comptes trouvée
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserAccount'
+        '400':
+          description: Mauvaise requête
+        '404':
+          description: Aucun compte trouvé
+        '500':
+          description: Erreur serveur
+  /accounts/{accountId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Détail d'un compte utilisateur
+      description: |
+        Retourne les informations détaillées d'un compte bancaire spécifique de l'utilisateur.
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant du compte bancaire
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Détail du compte trouvé
+          schema:
+            $ref: '#/definitions/UserAccount'
+        '400':
+          description: Mauvaise requête
+        '404':
+          description: Compte non trouvé
+        '500':
+          description: Erreur serveur
+  /accounts/{accountId}/transactions:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Liste des transactions d'un compte
+      description: |
+        Retourne la liste des transactions des 30 derniers jours pour un compte bancaire donné.
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant du compte bancaire
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Liste des transactions trouvée
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TransactionDetails'
+        '400':
+          description: Mauvaise requête
+        '404':
+          description: Aucune transaction trouvée
+        '500':
+          description: Erreur serveur
+  /accounts/{accountId}/transactions/{transactionId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Détail d'une transaction
+      description: |
+        Retourne les informations détaillées d'une transaction spécifique.
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant du compte bancaire
+        - name: transactionId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant de la transaction
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Détail de la transaction trouvé
+          schema:
+            $ref: '#/definitions/TransactionDetails'
+        '400':
+          description: Mauvaise requête
+        '404':
+          description: Transaction non trouvée
+        '500':
+          description: Erreur serveur
+    patch:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Mise à jour d'une transaction
+      description: |
+        Permet de modifier la catégorie ou la note d'une transaction (ex : ajouter un commentaire ou catégoriser une dépense).
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant du compte bancaire
+        - name: transactionId
+          in: path
+          required: true
+          type: string
+          description: L'identifiant de la transaction
+        - in: body
+          name: body
+          description: Champs à modifier (catégorie, note)
+          required: true
+          schema:
+            type: object
+            properties:
+              category:
+                type: string
+                example: Food
+              note:
+                type: string
+                example: Déjeuner entre collègues
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Transaction modifiée avec succès
+          schema:
+            $ref: '#/definitions/TransactionDetails'
+        '400':
+          description: Mauvaise requête
+        '404':
+          description: Transaction non trouvée
+        '500':
+          description: Erreur serveur
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  User:
+    properties:
+      email:
+        type: string
+        description: user email
+      password:
+        type: string
+        description: user password
+      firstName:
+        type: string
+        description: user first name
+      lastName:
+        type: string
+        description: user last name
+      userName:
+        type: string
+        description: user public name
+  Login:
+    properties:
+      email:
+        type: string
+        description: user email
+      password:
+        type: string
+        description: user password
+  ApiResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          id:
+            type: string
+          email:
+            type: string
+  LoginResponse:
+    type: object
+    properties:
+      token:
+        type: string
+  UserProfile:
+    type: object
+    properties:
+      userName:
+        type: string
+  UserAccount:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identifiant du compte
+        example: 1
+      name:
+        type: string
+        description: Nom du compte
+        example: Argent Bank Checking
+      number:
+        type: string
+        description: Numéro du compte
+        example: x3448
+      balance:
+        type: number
+        description: Solde du compte
+        example: 48098.43
+  TransactionDetails:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Identifiant de la transaction
+        example: 1
+      date:
+        type: string
+        description: Date de la transaction
+        example: 2020-02-20T00:00:00.0Z
+      description:
+        type: string
+        description: Description de la transaction
+        example: Golden Sun Bakery
+      amount:
+        type: number
+        description: Montant de la transaction
+        example: 8.00
+      balance:
+        type: number
+        description: Solde après transaction
+        example: 298.00
+      type:
+        type: string
+        description: Type de transaction
+        example: Electronic
+      category:
+        type: string
+        description: Catégorie de la transaction
+        example: Food
+      note:
+        type: string
+        description: Note ou commentaire
+        example: Déjeuner entre collègues
